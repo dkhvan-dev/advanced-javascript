@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>eShop</title>
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<div id="app">
+		<error v-if="errorRequest"></error>
+		<header v-if="!errorRequest">
+			<search v-input="searchHandler"></search>
+			<button class="cart-button" type="button" v-on:click="openCartHandler">Корзина<span class="cart-count">[{{ cart.length }}]</span></button>
+		</header>
+
+		<main v-if="!errorRequest">
+			<div class="goods-list">
+				<h3 v-if="filteredGoods.length == 0">Список товаров пуст</h3>
+				<div class="goods-item" v-for="(good, index) in filteredGoods">
+					<img v-bind:src="good.src">
+					<h3>{{ good.title }}</h3>
+					<p>{{ good.price }}</p>
+					<button type="button" :data-id="good.id" v-on:click="addToCart" class="add-good-to-cart">Добавить в корзину</button>
+				</div>
+			</div>
+			<div class="cart" v-if="isCartOpen">
+				<div class="cart-info">
+					<h2 class="cart-title">Корзина товаров</h2>
+					<h2 class="total-cost">Общая стоимость: {{ totalCost }}</h2>
+				</div>
+				<cart-list 
+					:cart="cart" 
+				/>
+			</div>
+		</main>
+	</div>
+
+	<!-- <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script> -->
+	<script src="vue.min.js"></script>
+	<script src="script.js"></script>
+</body>
+</html>
