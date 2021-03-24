@@ -103,12 +103,7 @@ header {
 /* Корзина */
 
 .cart {
-	display: grid;
-	grid-template-columns: repeat(4, 200px);
-	grid-template-rows: 2, 200px;
-	justify-content: space-around;
-	grid-row-gap: 10px;
-	padding: 10px;
+	padding-bottom: 10px;
 	margin-top: 20px;
 	border: 1px solid rgb(253, 28, 39);
 }
@@ -138,6 +133,15 @@ header {
 .cart h2 {
 	font-size: 18px;
 	text-align: center;
+}
+
+.total-cost {
+	margin-left: 40px;
+}
+
+.cart-list {
+	display: flex;
+	justify-content: space-around;
 }
 
 .cart-item {
@@ -174,18 +178,14 @@ header {
 	color: #fff;
 }
 
-/* .delete-from-cart {
-	margin-left: 60%;
-	border-radius: 8px;
-} */
-
-
 .delete-from-cart, .add-to-cart {
 	cursor: pointer;
 }
 
+.add-to-cart:hover {
+	background-color: rgb(53, 180, 21);
+}
 
 .delete-from-cart:hover {
 	background-color: rgb(253, 28, 39);
-	cursor: pointer;
 }

@@ -8,7 +8,10 @@ const vue = new Vue({
 		goods: [],
 		filteredGoods: [],
 		cart: [],
-		isCartOpen: false
+		isCartOpen: false,
+		addGoodPrices: [],
+		deletedGoodsFromCart: [],
+		totalCost: 0,
 	},
 
 	methods: {
@@ -23,11 +26,46 @@ const vue = new Vue({
 		addToCart(e) {
 			const index = e.target.dataset.index;
 			this.cart.push(this.filteredGoods[index]);
+			e.target.setAttribute("disabled", "disabled");
+
+			this.addGoodPrices.push(this.filteredGoods[index].price);
+			this.totalCost=0;
+			this.addGoodPrices.forEach((item) => {
+				this.totalCost+=item;
+			});
+			//console.log(e.target);
+			// this.cart.forEach((item) => {
+			// 	if (this.filteredGoods[index].title === item.title) console.log(1);
+			// })
+			// if (this.filteredGoods[index].title === this.cart[index].title)
+			//console.log(this.filteredGoods[index].title);
+			// this.cart[this.cart.length-1].quantity++;
+			// console.log(this.cart);
+		},
+
+		addItemCart(e) {
+			const index = e.target.dataset.index;
+			this.cart[index].quantity++;
+
+			this.addGoodPrices.push(this.cart[index].price);
+			this.totalCost=0;
+			this.addGoodPrices.forEach((item) => {
+				this.totalCost+=item;
+			});
 		},
 
 		deleteFromCart(e) {
 			const index = e.target.dataset.index;
-			this.cart.splice(index, 1);
+			if (this.cart[index].quantity !== 1) {
+				this.cart[index].quantity--;
+				this.deletedGoodsFromCart.push(this.cart[index]);
+			}
+			else {
+				this.deletedGoodsFromCart.push(this.cart.splice(index, 1)[0]);
+				
+			}
+			
+			this.totalCost -= this.deletedGoodsFromCart[this.deletedGoodsFromCart.length-1].price;
 		},
 
 		openCartHandler() {
@@ -72,6 +110,6 @@ const vue = new Vue({
 			})
 			.catch(err => {
 				console.log(err);
-			})
+			});
 	}
 });
