@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+	<meta charset="UTF-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>eShop</title>
+	<link rel="stylesheet" href="style.css">
+</head>
+<body>
+	<div id="app">
+		<header>
+			<search v-input="searchHandler"></search>
+			<button class="cart-button" type="button" v-on:click="openCartHandler">Корзина<span class="cart-count">[{{ cart.length + cartCount }}]</span></button>
+		</header>
+
+		<main>
+
+			<goods-list :goods="filteredGoods">
+				<template v-if="filteredGoods.length == 0" v-slot:nothing><h3>Список товаров пуст</h3></template>
+			</goods-list>
+
+			<div class="cart" v-if="isCartOpen">
+				<div class="cart-info">
+					<h2 class="cart-title">Корзина товаров</h2>
+					<h2 class="total-cost">Общая стоимость: {{ totalCost }}</h2>
+				</div>
+				<cart-list 
+					:cart="cart" 
+				/>
+			</div>
+		</main>
+	</div>
+
+	<script src="vue.min.js"></script>
+	<script src="script.js"></script>
+</body>
+</html>
