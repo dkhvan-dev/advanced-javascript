@@ -1,4 +1,6 @@
-const vue = new Vue({
+import {myModule} from './module.js';
+
+const app = new Vue({
 	el: '#app',
 
 	data: {
@@ -12,6 +14,7 @@ const vue = new Vue({
 		deletedGoodsFromCart: [],
 		totalCost: 0,
 		errorRequest: false,
+		buttons: []
 	},
 
 	methods: {
@@ -50,8 +53,9 @@ const vue = new Vue({
 
 		// Добавление товара в корзину
 		addToCart(e) {
-			const id = e.target.dataset.id;
+			const id = e.target.id;
 			let itemCart;
+
 			this.filteredGoods.forEach((item) => {
 				if (id == item.id) {
 					itemCart = {
@@ -63,13 +67,13 @@ const vue = new Vue({
 					};
 				}
 			});
-
+			
 			this.cart.push(itemCart);
-			e.target.setAttribute("disabled", "disabled");
-			//this.addGoodPrices.push(itemCart.price);
-
+			e.target.classList.add('inCart');
+			
 			this.totalCostCalc();
-			this.makePOSTRequest('/addToCart', itemCart);
+
+			//this.makePOSTRequest('/addToCart', itemCart);
 		},
 
 		// Увеличение количества определенного товара в корзине
@@ -79,7 +83,6 @@ const vue = new Vue({
 			this.filteredGoods.forEach((item) => {
 				if (this.cart[index].id == item.id) {
 					this.cart[index].quantity++;
-					//this.addGoodPrices.push(item.price);
 				}
 			});
 
@@ -91,41 +94,31 @@ const vue = new Vue({
 
 		// Удаление товара из корзины
 		deleteFromCart(e) {
+			this.buttons = document.querySelectorAll('.add-good-to-cart');
 			const index = e.target.dataset.index;
+
 			
-			if (this.cart.length == 1) {
-				this.cart.splice(index);
-			} else {
-				this.filteredGoods.forEach((item) => {
-					if (this.cart[index].id == item.id) {
-						if (this.cart[index].quantity > 1) {
-							this.cart[index].quantity--;
-							/*for (let i = this.addGoodPrices.length-1; i>=0; i--) {
-								if (this.addGoodPrices[i] == this.cart[index].price) {
-									this.addGoodPrices.splice(i, 1);
-									break;
-								}
-							}*/
-						}
-						else {
-							this.cart.splice(index, 1);
-							/*for (let i = this.addGoodPrices.length-1; i>=0; i--) {
-								if (this.addGoodPrices[i] == this.cart[index].price) {
-									this.addGoodPrices.splice(i, 1);
-									break;
-								}
-							}*/
-						}
-					}
-				});
-				
-				this.cartCount--;
-				this.totalCostCalc();
+			this.buttons.forEach((item) => {
+				if (this.cart[index].id == item.id && this.cart[index].quantity == 1) {
+					item.classList.remove('inCart');
+				}
+			});
+
+			if (this.cart[index].quantity > 1) {
+				this.cart[index].quantity--;
+			} else if (this.cart[index].quantity == 1) {
+				this.cart.splice(index, 1);
 			}
+
+			this.cartCount--;
+			this.totalCostCalc();
+
+			this.makePOSTRequest('/updateCart', this.cart);
 		},
 
-		// Подсчет стоиомсти корзины
+		// Подсчет стоимости корзины
 		totalCostCalc() {
+			console.log(this.cart);
 			let totalPrice = 0;
 			this.cart.forEach((item) => {
 				if (item.price !== undefined) {
@@ -143,17 +136,20 @@ const vue = new Vue({
 
 	async created() {
 		try {
+			myModule.on('addToBasket', this.addToCart.bind(this));
+			myModule.on('addItemToBasket', this.addItemToCart.bind(this));
+			myModule.on('deleteItemFromBasket', this.deleteFromCart.bind(this));
 			this.goods = await this.makeGETRequest('/catalog');
 			this.filteredGoods = this.goods;
 
 			this.cart = await this.makeGETRequest('/cart');
+			this.totalCostCalc();
 		} catch(err) {
 			console.error(err);
 		}
 	},
 
 	mounted() {
-		this.totalCostCalc();
 	}
 });
 
@@ -172,8 +168,13 @@ Vue.component('goods-item', {
 	<img v-bind:src="good.src">
 	<h3>{{ good.title }}</h3>
 	<p>{{ good.price }}</p>
-	<button type="button" :data-id="good.id" v-on:click="vue.addToCart" class="add-good-to-cart">Добавить в корзину</button></div>`,
-	props: ['good', 'id']
+	<button type="button" :id="good.id" v-on:click="addProductToCart" class="add-good-to-cart">Добавить в корзину</button></div>`,
+	props: ['good', 'id'],
+	methods: {
+		addProductToCart(event) {
+			myModule.emit('addToBasket', event);
+		}
+	}
 });
 
 // Компонент списка товаров корзины
@@ -190,11 +191,20 @@ Vue.component('cart-item', {
 	<img :src="good.src">
 	<h3>{{ good.title }}</h3>
 	<p class="cart-item-price">{{ good.price }}</p>
-	<button type="button" class="delete-from-cart" :data-index="index" v-on:click="vue.deleteFromCart">-</button>
+	<button type="button" class="delete-from-cart" :data-index="index" v-on:click="decrementItemCart">-</button>
 	<span class="cart-quantity">[{{ good.quantity }}]</span>
-	<button type="button" class="add-to-cart" :data-index="index" v-on:click="vue.addItemToCart">+</button>
+	<button type="button" class="add-to-cart" :data-index="index" v-on:click="incrementItemCart">+</button>
 	</div>`,
-	props: ['good', 'index']
+	props: ['good', 'index'],
+	methods: {
+		incrementItemCart(event) {
+			myModule.emit('addItemToBasket', event);
+		},
+
+		decrementItemCart(event) {
+			myModule.emit('deleteItemFromBasket', event);
+		}
+	}
 });
 
 Vue.component('error', {
@@ -208,12 +218,8 @@ Vue.component('error', {
 // Компонент поиска
 Vue.component('search', {
 	template: `<div class="search-block">
-	<input type="search" id="search-input" v-model="vue.search">
-	<button type="button" class="search" v-on:click="searchHandler">Искать</button>
+	<input type="search" id="search-input" v-model="app.search">
+	<button type="button" class="search" v-on:click="app.searchHandler">Искать</button>
 	</div>`,
 	props: [],
 });
-
-function searchHandler() {
-	app.searchHandler();
-}
