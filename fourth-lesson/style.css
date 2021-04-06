@@ -1,0 +1,42 @@
+input {
+	margin-top: 20px;
+	margin-left: 20px;
+	width: 230px;
+	height: 30px;
+}
+
+.error-name, .error-tel, .error-email {
+	display: none;
+	padding: 10px;
+	margin-left: 20px;
+	color: red;
+	border: 1px dashed black;
+}
+
+textarea {
+	margin-top: 20px;
+	width: 600px;
+	height: 200px;
+	resize: none;
+}
+
+button {
+	margin-top: 20px;
+	margin-left: 50px;
+	width: 200px;
+	height: 40px;
+	cursor: pointer;
+}
+
+button:hover {
+	background-color: lawngreen;
+	transition: .5s;
+}
+
+.true_value {
+	border: 1px solid green;
+}
+
+.false_value {
+	border: 1px solid red;
+}
